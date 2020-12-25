@@ -101,10 +101,8 @@ the current photo of an ingredient/pizza: ![img_1.png](screenshots/img_1.png)
      * Then you have to go in project directory, it's default name is *pizzeria_project*:
         * *cd pizzeria_project*
 5. Now it is time to set up your virtual environment:
-   * *pip install virtualenv*
-   * *virtualenv .*
-   * For Windows: *.\Scripts\activate*
-   * For Mac OS/Linux: *source /bin/activate*
+   * *pip install pipenv*
+   * *pipenv shell* 
 6. Final steps:
    * Install requirements: *pip install -r requirements.txt*
    * *python manage.py migrate*
