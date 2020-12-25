@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block filter %}
+{% endblock filter %}
+{% block content %}
+{% if customer.orders.all %}
+<h3 style="text-align: center">Your orders</h3>
+<br>
+{% else %}
+<h3 style="text-align: center">You haven't ordered anything yet, it's time to change it ;)</h3>
+{% endif %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">First name</th>
+      <th scope="col">Address</th>
+      <th scope="col">Products qty</th>
+      <th scope="col">Final price</th>
+    </tr>
+  </thead>
+  {% for order in orders %}
+  <tbody>
+    <tr>
+      <th scope="row"><a href="{{ order.get_absolute_url }}">{{ order.first_name }}</a></th>
+      <th scope="row"><a href="{{ order.get_absolute_url }}">{{ order.address }}</a></th>
+      <th scope="row"><a href="{{ order.get_absolute_url }}">{{ order.cart.total_products }}</a></th>
+      <th scope="row"><a href="{{ order.get_absolute_url }}">{{ order.cart.final_price }}</a></th>
+    </tr>
+  </tbody>
+  {% endfor %}
+</table>
+{% endblock content %}

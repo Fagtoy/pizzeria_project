@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block filter %}
+{% endblock filter %}
+{% block content %}
+<h3 style="text-align: center">Order cart</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Product</th>
+        <th scope="col">Category</th>
+      <th scope="col">Image</th>
+      <th scope="col">Price</th>
+        <th scope="col">QTY</th>
+      <th scope="col">Final price</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in current_cart.products.all %}
+    <tr>
+        <th scope="row">{{ item.product.name }}</th>
+        <th scope="row">{{ item.product.category }}</th>
+        <td class="w-25"><img src="{{ item.product.image.url }}" class="img-fluid"></td>
+        <td>${{ item.product.price }}</td>
+        <td>{{ item.qty }}</td>
+        <td>${{ item.final_price }}</td>
+    </tr>
+  {% endfor %}
+  <tr>
+      <td colspan="2"></td>
+      <td><strong>At all: {{ current_cart.total_products }} </strong>items in your cart</td>
+      <td><strong>Final price: ${{ current_cart.final_price }}</strong></td>
+  </tr>
+  </tbody>
+</table>
+<h3 style="text-align: center">Order information</h3>
+<p><strong>Customer:</strong> {{ order.customer.user.username }}</p>
+<p><strong>First name:</strong> {{ order.first_name }}</p>
+<p><strong>Last name:</strong> {{ order.last_name }}</p>
+<p><strong>Phone:</strong> {{ order.phone }}</p>
+<p><strong>Address:</strong> {{ order.address }}</p>
+<p><strong>Status:</strong> {{ order.status }}</p>
+<p><strong>Delivery:</strong> {{ order.delivery }}</p>
+<p><strong>Comment:</strong> {{ order.comment }}</p>
+<p><strong>Delivery/pickup date and time:</strong> {{ order.order_date_time }}</p>
+<p><strong>Created at:</strong> {{ order.created_at }}</p>
+{% endblock content %}

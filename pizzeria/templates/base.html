@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+{% load crispy_forms_tags %}
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Project</title>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+  <!-- Custom styles for this template -->
+  <link href="css/shop-homepage.css" rel="stylesheet">
+
+</head>
+<style>
+body {
+  padding-top: 56px;
+}
+</style>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'base' %}">Home</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      {% if request.user.is_authenticated %}
+      <a class="nav-link" href="{% url 'logout' %}">Log out</a>
+      <a href="{{ customer.get_absolute_url }}"><btn class="btn-success btn-block">Hello, {{ request.user }}</btn></a>
+      {% else %}
+      <a class="nav-link" href="{% url 'login' %}">Log in</a>
+      <a class="nav-link" href="{% url 'registration' %}">Sign up</a>
+      {% endif %}
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'about' %}">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'cart' %}">Cart <span class="badge badge-pill badge-danger">{{ cart.total_products }}</span></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+
+    <div class="row">
+
+      <div class="col-lg-3">
+        <div class="list-group">
+          <h3 style="margin-top: 50px">Categories:</h3>
+          {% for category in categories %}
+            {% if category.count != 0 %}
+              <a href="{{ category.url }}" class="list-group-item">{{ category.name }} ({{ category.count}})</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% block filter %}
+        <div>
+          <br>
+          <form action="{% url 'base' %}" method="get">
+            {% csrf_token %}
+            {{ filter.form|crispy }}
+            <button class="btn-success btn-block" type="submit">Search</button>
+          </form>
+          <br>
+          <a href="{% url 'base' %}"><button class="btn-primary btn-block mb-3">Discard</button></a>
+        </div>
+        {% endblock filter %}
+      </div>
+      <!-- /.col-lg-3 -->
+
+      <div class="col-lg-9">
+        <h1 class="my-4" style="text-align: center">Best pizza</h1>
+        <hr>
+        {% block content %}
+        {% if filter.qs %}
+          <div class="row">
+              {% for product in filter.qs %}
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                  <a href="{{ product.get_absolute_url }}"><img class="card-img-top" src="{{ product.image.url }}" alt=""></a>
+                  <div class="card-body">
+                    <h4 class="card-title">
+                      <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                    </h4>
+                    <h5>Category: {{ product.category }}</h5>
+                    <h5>${{ product.price }}</h5>
+                    <a href="{% url 'add_to_cart' slug=product.slug %}"><button class="btn btn-danger">Add to cart</button></a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+          {% else %}
+            <h1 style="text-align: center">We didn't find anything :(</h1>
+            <h5 style="text-align: center">Try again</h5>
+          {% endif %}
+        </div>
+        <!-- /.row -->
+        {% endblock content %}
+      </div>
+      <!-- /.col-lg-9 -->
+    </div>
+    <!-- /.row -->
+
+  </div>
+  <!-- /.container -->
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">&copy;Best Pizza</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block filter %}
+{% endblock filter %}
+{% block content %}
+<h3 class="text-center mt-5 mb-5">Your cart {% if not cart.products.count %}is empty{% endif %}</h3>
+{% if cart.products.count %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Product</th>
+        <th scope="col">Category</th>
+      <th scope="col">Image</th>
+      <th scope="col">Price</th>
+        <th scope="col">QTY</th>
+      <th scope="col">Final price</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in cart.products.all %}
+    <tr>
+        <th scope="row">{{ item.product.name }}</th>
+        <th scope="row">{{ item.product.category }}</th>
+        <td class="w-25"><img src="{{ item.product.image.url }}" class="img-fluid"></td>
+        <td>${{ item.product.price }}</td>
+        <td>
+            <form action="{% url 'change_qty' slug=item.product.slug %}" method="POST">
+                {% csrf_token %}
+                <input type="number" class="form-control" name="qty" style="width: 70px;" min="1" value="{{ item.qty }}">
+                <br>
+                <input type="submit" class="btn btn-primary" value="Change qty">
+            </form>
+        </td>
+        <td>${{ item.final_price }}</td>
+        <td><a href="{% url 'delete_from_cart' slug=item.product.slug %}">
+            <button class="btn btn-danger">Delete</button>
+        </a> </td>
+    </tr>
+  {% endfor %}
+  <tr>
+      <td colspan="2"></td>
+      <td><strong>At all: {{ cart.total_products }} </strong>items in your cart</td>
+      <td><strong>Final price: ${{ cart.final_price }}</strong></td>
+      <td><a href="{% url 'finish_order' %}"><button class="btn btn-primary">To make the order</button></a></td>
+  </tr>
+  </tbody>
+</table>
+{% endif %}
+{% endblock content %}
