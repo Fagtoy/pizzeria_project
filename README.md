@@ -76,7 +76,10 @@ the following code resizes it to needed resolution (and raises an Exception if i
   ```
 * **Django REST Framework**:
   * Wrote [*serializers*](pizzeria/api/serializers.py), [*api_views*](pizzeria/api/api_views.py), using [*viewsets*](https://www.django-rest-framework.org/api-guide/viewsets/) and [*generic views*](https://www.django-rest-framework.org/api-guide/generic-views/).
-  * Implemented [token authentication](https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication).
+  * Implemented [token authentication](https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication),
+    [PageNumberPagination](https://www.django-rest-framework.org/api-guide/pagination/#setup), 
+    [SearchFilter](https://www.django-rest-framework.org/api-guide/filtering/#searchfilter),
+    [OrderingFilter](https://www.django-rest-framework.org/api-guide/filtering/#orderingfilter).
   * Changed permissions for sending requests in [*api_views*](pizzeria/api/api_views.py) for pizzas, categories and orders, so a user has to be authenticated to send a **GET** request and be the admin user to send **POST**, **PUT** and **DELETE**.
     Only a user who made an order has permission to delete it, sending a **DELETE** request.
   * Overrode *create* method in [*api_views/PizzaViewSet*](pizzeria/api/api_views.py), so now it's possible to write a category name and ingredients names 
