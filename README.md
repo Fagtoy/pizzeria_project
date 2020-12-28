@@ -107,7 +107,7 @@ the current photo of an ingredient/pizza: ![img_1.png](screenshots/img_1.png)
    * *pip install pipenv*
    * *pipenv shell* 
 6. Final steps:
-   * Install requirements: *pip install -r requirements.txt*
+   * Install requirements: *pipenv install -r requirements.txt*
    * *python manage.py migrate*
    * *python manage.py runserver*
 7. If you want to open the admin site you need a superuser, so type: *python manage.py createsuperuser* and 
