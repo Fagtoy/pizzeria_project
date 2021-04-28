@@ -22,8 +22,9 @@ class PizzaFilter(django_filters.FilterSet):
         if name and value:
             pizza_ids = list(queryset.filter(ingredients__in=value).values_list('id', flat=True))
             filtered_pizza_ids = []
+            value_len = len(value)
             for k, v in Counter(pizza_ids).items():
-                if v == len(value):
+                if v == value_len:
                     filtered_pizza_ids.append(k)
             return queryset.filter(id__in=filtered_pizza_ids)
         else:
