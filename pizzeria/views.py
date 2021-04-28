@@ -15,6 +15,7 @@ from .filters import PizzaFilter
 from .forms import OrderForm, CreateUserForm
 from .mixins import CategoryMixin, CartMixin, CustomerMixin
 from .models import *
+from .utils import calculate_cart_total, calculate_cart_product_total
 
 
 @transaction.atomic()
@@ -31,6 +32,7 @@ def registration(request):
             if form.is_valid():
                 try:
                     user = form.save()
+                    Token.objects.create(user=user)
                     phone_number = form.cleaned_data['phone_number']
                     address = form.cleaned_data['address']
                     customer = Customer.objects.create(user=user, phone_number=phone_number, address=address)
@@ -57,7 +59,7 @@ def login_view(request):
 
             user = authenticate(request, username=username, password=password)
 
-            if user is not None:
+            if user is not None and Token.objects.filter(user=user).exists():
                 login(request, user)
                 return redirect('base')
             else:
@@ -77,8 +79,7 @@ class BaseView(LoginRequiredMixin, CartMixin, View):
     login_url = 'login'
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            customer = Customer.objects.get(user=request.user)
+        customer = Customer.objects.get(user=request.user)
         f = PizzaFilter(request.GET, queryset=Pizza.objects.filter(in_stock=True))
         context = {
             'categories': Category.objects.get_categories_for_sidebar(),
@@ -151,7 +152,7 @@ class AddProductToCartView(LoginRequiredMixin, CartMixin, View):
     def get(self, request, *args, **kwargs):
         product_slug = kwargs.get('slug')
         product = Pizza.objects.get(slug=product_slug)
-        cart_product, created = CartProduct.objects.get_or_create(
+        cart_product, created = CartProduct.objects.select_related('product').get_or_create(
             customer=self.cart.customer, cart=self.cart, product=product
         )
         if created:
@@ -159,9 +160,8 @@ class AddProductToCartView(LoginRequiredMixin, CartMixin, View):
             cart_product.save()
             self.cart.products.add(cart_product)
         else:
-            cart_product.qty += 1
-            cart_product.save()
-        self.cart.get_total()
+            calculate_cart_product_total(cart_product, cart_product.qty + 1)
+        calculate_cart_total(self.cart)
         return redirect('cart')
 
 
@@ -176,7 +176,7 @@ class DeleteFromCartView(LoginRequiredMixin, CartMixin, View):
         )
         self.cart.products.remove(cart_product)
         cart_product.delete()
-        self.cart.get_total()
+        calculate_cart_total(self.cart)
         return redirect('cart')
 
 
@@ -186,13 +186,12 @@ class ChangeQtyView(LoginRequiredMixin, CartMixin, View):
     def post(self, request, *args, **kwargs):
         product_slug = kwargs.get('slug')
         product = Pizza.objects.get(slug=product_slug)
-        cart_product = CartProduct.objects.get(
+        cart_product = CartProduct.objects.select_related('product').get(
             customer=self.cart.customer, cart=self.cart, product=product
         )
-        qty = request.POST.get('qty')
-        cart_product.qty = qty
-        cart_product.save()
-        self.cart.get_total()
+        qty = int(request.POST.get('qty'))
+        calculate_cart_product_total(cart_product, qty)
+        calculate_cart_total(self.cart)
         return redirect('cart')
 
 

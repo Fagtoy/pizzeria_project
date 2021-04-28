@@ -1,46 +1,10 @@
-import sys
-from io import BytesIO
-
-from PIL import Image
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 from rest_framework.authtoken.models import Token
 
-
-def get_image(obj, width, height):
-    return mark_safe(f'<img src={obj.image.url} width="{width}" height="{height}"')
-
-
-def change_image_resolution(**kwargs):
-    image = kwargs.get('image')
-    min_resolution = kwargs.get('min_resolution')
-    max_resolution = kwargs.get('max_resolution')
-    max_image_size = kwargs.get('max_image_size')
-    new_image_width = kwargs.get('new_image_width')
-    new_image_height = kwargs.get('new_image_height')
-
-    img = Image.open(image)
-    min_height, min_width = min_resolution
-    max_height, max_width = max_resolution
-    if image.size > max_image_size:
-        raise Exception(f'Uploaded images\'s size could not be bigger than {max_image_size}')
-    if img.height < min_height or img.width < min_width or img.height > max_height or img.width > max_width:
-        new_img = img.convert('RGB')
-        resized_new_image = new_img.resize((new_image_width, new_image_height), Image.ANTIALIAS)
-        file_stream = BytesIO()
-        resized_new_image.save(file_stream, 'JPEG', quality=90)
-        file_stream.seek(0)
-        name = image.name
-        image = InMemoryUploadedFile(
-            file_stream, 'ImageField', name, 'jpeg/image', sys.getsizeof(file_stream), None
-        )
-    return image
+from pizzeria.managers import CategoryManager
+from pizzeria.utils import get_image, change_image_resolution
 
 
 class Pizza(models.Model):
@@ -106,21 +70,10 @@ class Ingredient(models.Model):
         return image
 
 
-class CategoryManager(models.Manager):
-
-    def get_queryset(self):
-        return super().get_queryset()
-
-    def get_categories_for_sidebar(self):
-        qs = list(self.get_queryset().annotate(models.Count('pizza')))
-        context = [dict(name=category.name, url=category.get_absolute_url,
-                        count=getattr(category, 'pizza__count')) for category in qs]
-        return context
-
-
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='Name', unique=True)
     slug = models.SlugField(unique=True, verbose_name='Slug')
+
     objects = CategoryManager()
 
     def __str__(self):
@@ -152,18 +105,6 @@ class Cart(models.Model):
 
     def __str__(self):
         return f'{self.customer}\'s cart'
-
-    def get_total(self, *args, **kwargs):
-        final_price = 0
-        total_products = 0
-        for product in self.products.all():
-            product.final_price = product.product.price * product.qty
-            product.save()
-            final_price += product.final_price
-            total_products += product.qty
-        self.total_products = total_products
-        self.final_price = final_price
-        return self.save()
 
 
 class Customer(models.Model):
@@ -221,9 +162,3 @@ class Order(models.Model):
 
     def get_absolute_url(self):
         return reverse('order_view', kwargs={'pk': self.pk})
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)

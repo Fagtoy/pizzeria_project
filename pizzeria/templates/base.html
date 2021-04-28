@@ -63,7 +63,7 @@ body {
           <h3 style="margin-top: 50px">Categories:</h3>
           {% for category in categories %}
             {% if category.count != 0 %}
-              <a href="{{ category.url }}" class="list-group-item">{{ category.name }} ({{ category.count}})</a>
+              <a href="{{ category.get_absolute_url }}" class="list-group-item">{{ category.name }} ({{ category.count}})</a>
             {% endif %}
           {% endfor %}
         </div>

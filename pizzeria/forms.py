@@ -6,26 +6,20 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .models import Order, Customer
+from .models import Order
 
 PHONE_RE = r'\b380\d{9}$\b'
 NAMES_RE = r'\b[A-Z][a-z]+$\b'
 
 
 def names_phone_validation(first_name, last_name, phone):
-    if re.match(PHONE_RE, phone):
-        pass
-    elif not re.match(PHONE_RE, phone):
+    if not re.match(PHONE_RE, phone):
         raise ValidationError('Input a valid phone number: "380" and 9 digits after')
 
-    if re.match(NAMES_RE, first_name):
-        pass
-    elif not re.match(NAMES_RE, first_name):
+    if not re.match(NAMES_RE, first_name):
         raise ValidationError('Input a valid first name')
 
-    if re.match(NAMES_RE, last_name):
-        pass
-    elif not re.match(NAMES_RE, last_name):
+    if not re.match(NAMES_RE, last_name):
         raise ValidationError('Input a valid last name')
 
     return first_name, last_name, phone

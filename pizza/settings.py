@@ -11,16 +11,18 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv, find_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+load_dotenv(find_dotenv())
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '6f!j8_%q8hfk2=c!$r9m_2kn1r%_ga)r2mk8==$(ahds&@o3@^'
+SECRET_KEY = os.getenv('SECRET_KEY', None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -93,9 +95,13 @@ WSGI_APPLICATION = 'pizza.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'HOST': os.getenv('MAIN_DATABASE_HOST', 'port-db'),
+        'USER': os.getenv('MAIN_DATABASE_USER', 'postgres'),
+        'PASSWORD': os.getenv('MAIN_DATABASE_PASSWORD', 'password'),
+        'NAME': os.getenv('MAIN_DATABASE_NAME', 'port_main'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'PORT': os.getenv('MAIN_DATABASE_PORT', '5432'),
+    },
 }
 
 

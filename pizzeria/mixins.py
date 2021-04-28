@@ -20,9 +20,7 @@ class CategoryMixin(SingleObjectMixin):
 class CustomerMixin(View):
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            customer = Customer.objects.get(user=request.user)
-        self.customer = customer
+        self.customer = Customer.objects.get(user=request.user)
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
