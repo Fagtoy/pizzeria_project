@@ -7,15 +7,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import DetailView, CreateView
 from django.views.generic.base import View
+from rest_framework.authtoken.models import Token
 
 from .filters import PizzaFilter
 from .forms import OrderForm, CreateUserForm
 from .mixins import CategoryMixin, CartMixin, CustomerMixin
-from .models import *
-from .utils import calculate_cart_total, calculate_cart_product_total
+from .models import Customer, Pizza, Category, Ingredient, Order, CartProduct
 
 
 @transaction.atomic()
@@ -160,8 +161,9 @@ class AddProductToCartView(LoginRequiredMixin, CartMixin, View):
             cart_product.save()
             self.cart.products.add(cart_product)
         else:
-            calculate_cart_product_total(cart_product, cart_product.qty + 1)
-        calculate_cart_total(self.cart)
+            cart_product.qty += 1
+            cart_product.save()
+        self.cart.save()
         return redirect('cart')
 
 
@@ -176,7 +178,7 @@ class DeleteFromCartView(LoginRequiredMixin, CartMixin, View):
         )
         self.cart.products.remove(cart_product)
         cart_product.delete()
-        calculate_cart_total(self.cart)
+        self.cart.save()
         return redirect('cart')
 
 
@@ -190,8 +192,9 @@ class ChangeQtyView(LoginRequiredMixin, CartMixin, View):
             customer=self.cart.customer, cart=self.cart, product=product
         )
         qty = int(request.POST.get('qty'))
-        calculate_cart_product_total(cart_product, qty)
-        calculate_cart_total(self.cart)
+        cart_product.qty = qty
+        cart_product.save()
+        self.cart.save()
         return redirect('cart')
 
 

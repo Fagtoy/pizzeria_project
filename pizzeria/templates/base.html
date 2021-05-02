@@ -46,7 +46,7 @@ body {
             <a class="nav-link" href="{% url 'about' %}">About</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'cart' %}">Cart <span class="badge badge-pill badge-danger">{{ cart.total_products }}</span></a>
+            <a class="nav-link" href="{% url 'cart' %}">Cart <span class="badge badge-pill badge-danger">{% if cart.total_products %} {{ cart.total_products }} {% else %} 0 {% endif %}</span></a>
           </li>
         </ul>
       </div>

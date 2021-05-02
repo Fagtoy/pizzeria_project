@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Sum
 from django.urls import reverse
-from rest_framework.authtoken.models import Token
 
 from pizzeria.managers import CategoryManager
 from pizzeria.utils import get_image, change_image_resolution
@@ -94,17 +94,28 @@ class CartProduct(models.Model):
     def __str__(self):
         return f'{self.customer}\'s cart product'
 
+    def save(self, **kwargs):
+        self.final_price = self.product.price * self.qty
+        super().save(**kwargs)
+
 
 class Cart(models.Model):
     customer = models.ForeignKey('Customer', on_delete=models.CASCADE, verbose_name='Owner', null=True)
     products = models.ManyToManyField(CartProduct, blank=True, related_name='related_cart', verbose_name='Products')
-    total_products = models.PositiveSmallIntegerField(default=0, verbose_name='Quantity of products')
-    final_price = models.DecimalField(max_digits=9, decimal_places=2, default=0, verbose_name='Final price')
+    total_products = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Quantity of products')
+    final_price = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, verbose_name='Final price')
     in_order = models.BooleanField(default=False)
     for_anon_user = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.customer}\'s cart'
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        products_data = self.products.all().aggregate(price=Sum('final_price'), total_products=Sum('qty'))
+        self.total_products = products_data['total_products']
+        self.final_price = products_data['price']
+        super().save(force_update=True)
 
 
 class Customer(models.Model):

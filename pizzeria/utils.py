@@ -27,21 +27,3 @@ def change_image_resolution(image, min_resolution, max_resolution, max_image_siz
             file_stream, 'ImageField', name, 'jpeg/image', sys.getsizeof(file_stream), None
         )
     return image
-
-
-def calculate_cart_product_total(cart_product, qty):
-    cart_product.qty = qty
-    cart_product.final_price = cart_product.product.price * qty
-    cart_product.save()
-
-
-def calculate_cart_total(cart):
-    final_price = 0
-    total_products = 0
-    products_data = list(cart.products.all().values_list('final_price', flat=True))
-    for product_final_price in products_data:
-        final_price += product_final_price
-        total_products += 1
-    cart.total_products = total_products
-    cart.final_price = final_price
-    cart.save()
