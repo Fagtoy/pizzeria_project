@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .models import Order
+from .models import Order, Customer
 
 PHONE_RE = r'\b380\d{9}$\b'
 NAMES_RE = r'\b[A-Z][a-z]+$\b'
@@ -66,5 +66,7 @@ class CreateUserForm(UserCreationForm):
         email = cleaned_data['email']
         if User.objects.filter(email=email).exists():
             raise ValidationError('Email exists')
+        if Customer.objects.filter(phone_number=phone).exists():
+            raise ValidationError('Phone exists')
 
         return cleaned_data

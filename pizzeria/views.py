@@ -31,20 +31,15 @@ def registration(request):
             form = CreateUserForm(request.POST or None)
 
             if form.is_valid():
-                try:
-                    user = form.save()
-                    Token.objects.create(user=user)
-                    phone_number = form.cleaned_data['phone_number']
-                    address = form.cleaned_data['address']
-                    customer = Customer.objects.create(user=user, phone_number=phone_number, address=address)
-                    customer.save()
-                    username = form.cleaned_data['username']
-                    messages.success(request, f'Account was created for {username}')
-                    return redirect('login')
-                except IntegrityError:
-                    context = {'form': form}
-                    messages.info(request, f'Phone already exist')
-                    return render(request, 'registration.html', context)
+                user = form.save()
+                Token.objects.create(user=user)
+                phone_number = form.cleaned_data['phone_number']
+                address = form.cleaned_data['address']
+                customer = Customer.objects.create(user=user, phone_number=phone_number, address=address)
+                customer.save()
+                username = form.cleaned_data['username']
+                messages.success(request, f'Account was created for {username}')
+                return redirect('login')
         context = {'form': form}
         return render(request, 'registration.html', context)
 
